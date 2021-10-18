@@ -10,43 +10,48 @@ public class Request {
     public String method;
     public String http_ver;
     public String uri;
-    public ArrayList<String> headers;
+    public HashMap<String, String> headers;
     public HashMap<String,String> reqParams;
     public ArrayList<String> body;
 
     Request(BufferedReader in) throws IOException {
         String str;
-        headers = new ArrayList<String>();
+        headers = new HashMap<String, String>();
         body = new ArrayList<String>();
 
         str = in.readLine();
+        if (str == null)
+            return;
         method = str.split(" ")[0];
         uri = str.split(" ")[1];
         http_ver = str.split(" ")[2];
 
         str = in.readLine();
         while (!str.equals("")) {
-            headers.add(str);
+            String[] h = str.split(": ");
+            headers.put(h[0], h[1]);
             str = in.readLine();
         }
-/*
-        str = in.readLine();
-        while (!str.equals("")) {
-            body.add(str);
+
+        /*
+        if (method.equals("POST")) {
             str = in.readLine();
+            while (!str.equals("")) {
+                body.add(str);
+                str = in.readLine();
+            }
         }
- */
+        */
     }
 
     @Override
     public String toString() {
         String s = "";
         s += method + " " + uri + " " + http_ver + '\n';
-        Iterator<String> i = headers.iterator();
-        while (i.hasNext()) {
-            s += i.next() + '\n';
+        for (String h : headers.keySet()) {
+            s += h + ": " + headers.get(h) + '\n';
         }
-        i = body.iterator();
+        Iterator<String> i = body.iterator();
         while (i.hasNext()) {
             s += i.next() + '\n';
         }
