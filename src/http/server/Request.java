@@ -11,13 +11,13 @@ public class Request {
     public String http_ver;
     public String uri;
     public HashMap<String, String> headers;
-    public HashMap<String,String> reqParams;
-    public ArrayList<String> body;
+    public HashMap<String, String> reqParams;
+    public HashMap<String, String> body;
 
     Request(BufferedReader in) throws IOException {
         String str;
         headers = new HashMap<String, String>();
-        body = new ArrayList<String>();
+        body = new HashMap<String, String>();
 
         str = in.readLine();
         if (str == null)
@@ -26,6 +26,7 @@ public class Request {
         uri = str.split(" ")[1];
         http_ver = str.split(" ")[2];
 
+        // header parsing
         str = in.readLine();
         while (!str.equals("")) {
             String[] h = str.split(": ");
@@ -33,15 +34,19 @@ public class Request {
             str = in.readLine();
         }
 
-        /*
-        if (method.equals("POST")) {
+        // body parsing
+        if (headers.containsKey("Content-Length")) {
+            String boundary = headers.get("Content-Type").split("=")[1];
             str = in.readLine();
-            while (!str.equals("")) {
-                body.add(str);
+            while (!str.equals("--" + boundary + "--")) {
+                assert boundary.equals(str);
+                String key = in.readLine().split("=")[1].replace('"',' ').strip();
+                in.readLine();
+                String value = in.readLine();
+                body.put(key, value);
                 str = in.readLine();
             }
         }
-        */
     }
 
     @Override
@@ -51,9 +56,9 @@ public class Request {
         for (String h : headers.keySet()) {
             s += h + ": " + headers.get(h) + '\n';
         }
-        Iterator<String> i = body.iterator();
-        while (i.hasNext()) {
-            s += i.next() + '\n';
+        s += '\n';
+        for (String k : body.keySet()) {
+            s += k + "=" + body.get(k) + '\n';
         }
         return s;
     }

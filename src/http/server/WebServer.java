@@ -46,7 +46,6 @@ public class WebServer {
                 BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));
                 PrintWriter out = new PrintWriter(remote.getOutputStream());
 
-                //ArrayList<String> str = parseRequest(in);
                 Request r = new Request(in);
                 System.out.println(r);
                 printResource(r.uri, out);
@@ -68,17 +67,6 @@ public class WebServer {
     public static void main(String args[]) {
         WebServer ws = new WebServer();
         ws.start();
-    }
-
-    public static ArrayList<String> parseRequest(BufferedReader in) throws IOException {
-        ArrayList<String> al = new ArrayList<String>();
-        String str = in.readLine();
-        while (!str.equals("")) {
-            al.add(str);
-            System.out.println(str);
-            str = in.readLine();
-        }
-        return al;
     }
 
     public static void printResource(String path, PrintWriter out) throws FileNotFoundException {
