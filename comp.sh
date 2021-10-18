@@ -1,2 +1,2 @@
 rm -rf bin/*.class
-javac -d bin/ src/http/client/WebPing.java src/http/server/WebServer.java
+javac -d bin/ src/http/server/*.java src/http/client/*.java

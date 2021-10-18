@@ -5,6 +5,7 @@ package http.server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -42,38 +43,24 @@ public class WebServer {
                 Socket remote = s.accept();
                 // remote is now the connected socket
                 System.out.println("Connection, sending data.");
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        remote.getInputStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));
                 PrintWriter out = new PrintWriter(remote.getOutputStream());
 
-                // read the data sent. We basically ignore it,
-                // stop reading once a blank line is hit. This
-                // blank line signals the end of the client HTTP
-                // headers.
-                String str = ".";
+                //ArrayList<String> str = parseRequest(in);
+                Request r = new Request(in);
+                System.out.println(r);
+                printResource(r.uri, out);
 
-                // Send the response
-                // Send the headers
-                out.println("HTTP/1.0 200 OK");
-                out.println("Content-Type: text/html");
-                out.println("Server: Bot");
-                // this blank line signals the end of the headers
-                out.println("");
-
-                str = in.readLine(); // GET / HTTP/1.1
-                String uri = str.split(" ")[1];
-                if (uri.equals("/miam")) {
-                    File myObj = new File("html/miam.html");
-                    Scanner myReader = new Scanner(myObj);
-                    while (myReader.hasNextLine()) {
-                        String data = myReader.nextLine();
-                        out.println(data);
-                    }
-                    myReader.close();
+                /*
+                if (method.equals("POST")) {
+                    PostRequest pr = new PostRequest(str);
+                    printResource(pr.uri, out);
                 } else {
-                    // Send the HTML page
-                    out.println("<H1>Welcome to the Ultra Mini-WebServer</H1>");
+                    Request r = new Request(str); // Request parsing
+                    printResource(r.uri, out);
                 }
+                 */
+
                 out.flush();
                 remote.close();
 
@@ -91,5 +78,42 @@ public class WebServer {
     public static void main(String args[]) {
         WebServer ws = new WebServer();
         ws.start();
+    }
+
+    public static ArrayList<String> parseRequest(BufferedReader in) throws IOException {
+        ArrayList<String> al = new ArrayList<String>();
+        String str = in.readLine();
+        while (!str.equals("")) {
+            al.add(str);
+            System.out.println(str);
+            str = in.readLine();
+        }
+        return al;
+    }
+
+    public static void printResource(String path, PrintWriter out) throws FileNotFoundException {
+
+        // Send the response
+        // Send the headers
+        out.println("HTTP/1.0 200 OK");
+        out.println("Content-Type: text/html");
+        out.println("Server: Bot");
+        // this blank line signals the end of the headers
+        out.println("");
+
+        File myObj;
+        Scanner myReader;
+        try {
+            myObj = new File("html/" + path);
+            myReader = new Scanner(myObj);
+        } catch (IOException e) {
+            myObj = new File("html/index.html");
+            myReader = new Scanner(myObj);
+        }
+        while (myReader.hasNextLine()) {
+            String data = myReader.nextLine();
+            out.println(data);
+        }
+        myReader.close();
     }
 }
