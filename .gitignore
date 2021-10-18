@@ -1,4 +1,4 @@
-bin/
+bin/http/
 *.class
 .idea/
 .DS_STORE
