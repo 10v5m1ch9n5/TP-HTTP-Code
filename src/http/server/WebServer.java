@@ -51,16 +51,6 @@ public class WebServer {
                 System.out.println(r);
                 printResource(r.uri, out);
 
-                /*
-                if (method.equals("POST")) {
-                    PostRequest pr = new PostRequest(str);
-                    printResource(pr.uri, out);
-                } else {
-                    Request r = new Request(str); // Request parsing
-                    printResource(r.uri, out);
-                }
-                 */
-
                 out.flush();
                 remote.close();
 
