@@ -1,2 +1,4 @@
 bin/
 *.class
+.idea/
+.DS_STORE
