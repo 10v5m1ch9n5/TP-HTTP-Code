@@ -45,32 +45,18 @@ public class WebServer {
                 // remote is now the connected socket
                 System.out.println("Connection, sending data.");
                 BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));
-                PrintWriter out = new PrintWriter(remote.getOutputStream());
+                //PrintWriter out = new PrintWriter(remote.getOutputStream());
+                OutputStream os = remote.getOutputStream();
 
                 Request r = new Request(in);
                 System.out.println(r);
-                if(r.uri.equals("/img")) {
-                    OutputStream o = remote.getOutputStream();
-                    String response = "HTTP/1.0 200 OK\r\nContent-Type: image/jpg\r\nServer: Bot\r\n\r\n";
-                    o.write(response.getBytes(StandardCharsets.UTF_8));
-
-                    InputStream fis = new FileInputStream("images/ks.jpg");
-                    File f = new File("images/ks.jpg");
-                    byte imageData[] = new byte[(int) f.length()];
-                    fis.read(imageData);
-                    fis.close();
-                    o.write(imageData);
-                    /*
-                    int ch;
-                    while ((ch = fis.read()) != -1) {
-                        out.print((char) ch);
-                    }
-                     */
+                if(r.uri.equals("/")) {
+                    resolve("index.html", os);
                 } else {
-                    printResource(r.uri, out);
+                    resolve(r.uri.substring(1), os);
                 }
 
-                out.flush();
+                os.flush();
                 remote.close();
 
             } catch (Exception e) {
@@ -89,28 +75,41 @@ public class WebServer {
         ws.start();
     }
 
-    public static void printResource(String path, PrintWriter out) throws FileNotFoundException {
-        // Send the response
-        // Send the headers
-        out.println("HTTP/1.0 200 OK");
-        out.println("Content-Type: text/html");
-        out.println("Server: Bot");
-        // this blank line signals the end of the headers
-        out.println("");
+    public static void resolve(String resourcePath, OutputStream os) throws IOException {
+        File f = new File(resourcePath);
+        String extension = resourcePath.split("\\.")[1];
+        if (extension.equals("html")) {
+            f = new File("html/" + resourcePath);
+        }
+        StringBuilder response = new StringBuilder();
+        if (!f.exists()) {
+            response.append("HTTP/1.0 404 Not Found\r\n\r\n");
+            System.out.println("404 NOT FOUND " + resourcePath);
+            os.write(response.toString().getBytes(StandardCharsets.UTF_8));
+            return;
+        }
+        response.append("HTTP/1.0 200 OK\r\n");
+        response.append("Content-Type: ");
+        response.append(getMIMEType(extension));
+        response.append("\r\n");
+        response.append("Server: Bot\r\n\r\n");
+        os.write(response.toString().getBytes(StandardCharsets.UTF_8));
 
-        File myObj;
-        Scanner myReader;
-        try {
-            myObj = new File("html/" + path);
-            myReader = new Scanner(myObj);
-        } catch (IOException e) {
-            myObj = new File("html/index.html");
-            myReader = new Scanner(myObj);
+        FileInputStream fis = new FileInputStream(f);
+        byte[] data = new byte[(int) f.length()];
+        fis.read(data);
+        fis.close();
+        os.write(data);
+        os.write("\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String getMIMEType(String extension) {
+        if (extension.equals("jpg") || extension.equals("jpeg")) {
+            return "image/jpeg";
+        } else if (extension.equals("html") || extension.equals("htm")) {
+            return "text/html";
+        } else {
+            return null;
         }
-        while (myReader.hasNextLine()) {
-            String data = myReader.nextLine();
-            out.println(data);
-        }
-        myReader.close();
     }
 }
