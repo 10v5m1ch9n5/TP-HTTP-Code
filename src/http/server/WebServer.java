@@ -5,6 +5,7 @@ package http.server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -48,7 +49,26 @@ public class WebServer {
 
                 Request r = new Request(in);
                 System.out.println(r);
-                printResource(r.uri, out);
+                if(r.uri.equals("/img")) {
+                    OutputStream o = remote.getOutputStream();
+                    String response = "HTTP/1.0 200 OK\r\nContent-Type: image/jpg\r\nServer: Bot\r\n\r\n";
+                    o.write(response.getBytes(StandardCharsets.UTF_8));
+
+                    InputStream fis = new FileInputStream("images/ks.jpg");
+                    File f = new File("images/ks.jpg");
+                    byte imageData[] = new byte[(int) f.length()];
+                    fis.read(imageData);
+                    fis.close();
+                    o.write(imageData);
+                    /*
+                    int ch;
+                    while ((ch = fis.read()) != -1) {
+                        out.print((char) ch);
+                    }
+                     */
+                } else {
+                    printResource(r.uri, out);
+                }
 
                 out.flush();
                 remote.close();
@@ -70,7 +90,6 @@ public class WebServer {
     }
 
     public static void printResource(String path, PrintWriter out) throws FileNotFoundException {
-
         // Send the response
         // Send the headers
         out.println("HTTP/1.0 200 OK");

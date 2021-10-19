@@ -1,4 +1,5 @@
 bin/http/
+bin/images/
 *.class
 .idea/
 .DS_STORE
