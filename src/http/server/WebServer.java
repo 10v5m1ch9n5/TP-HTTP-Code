@@ -6,8 +6,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
@@ -86,14 +84,15 @@ public class WebServer {
             response.append("HTTP/1.0 404 Not Found\r\n\r\n");
             System.out.println("404 NOT FOUND " + resourcePath);
             os.write(response.toString().getBytes(StandardCharsets.UTF_8));
-            return;
+            f = new File("html/not_found.html");
+        } else {
+            response.append("HTTP/1.0 200 OK\r\n");
+            response.append("Content-Type: ");
+            response.append(getMIMEType(extension));
+            response.append("\r\n");
+            response.append("Server: Bot\r\n\r\n");
+            os.write(response.toString().getBytes(StandardCharsets.UTF_8));
         }
-        response.append("HTTP/1.0 200 OK\r\n");
-        response.append("Content-Type: ");
-        response.append(getMIMEType(extension));
-        response.append("\r\n");
-        response.append("Server: Bot\r\n\r\n");
-        os.write(response.toString().getBytes(StandardCharsets.UTF_8));
 
         FileInputStream fis = new FileInputStream(f);
         byte[] data = new byte[(int) f.length()];
@@ -108,6 +107,12 @@ public class WebServer {
             return "image/jpeg";
         } else if (extension.equals("html") || extension.equals("htm")) {
             return "text/html";
+        } else if (extension.equals("ico")) {
+            return "image/vnd.microsoft.icon";
+        } else if(extension.equals("css")) {
+            return "text/css";
+        } else if (extension.equals("js")) {
+            return "text/javascript";
         } else {
             return null;
         }
