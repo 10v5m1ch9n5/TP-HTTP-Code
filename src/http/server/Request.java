@@ -18,6 +18,7 @@ public class Request {
         String str;
         headers = new HashMap<String, String>();
         body = new HashMap<String, String>();
+        reqParams = new HashMap<>();
 
         str = in.readLine();
         if (str == null)
@@ -25,6 +26,16 @@ public class Request {
         method = str.split(" ")[0];
         uri = str.split(" ")[1];
         http_ver = str.split(" ")[2];
+
+        if (uri.contains("?")) {
+            String[] par = uri.split("\\?")[1].split("&");
+            uri = uri.split("\\?")[0];
+            System.out.println("\nParamètres HTTP :");
+            for (String s : par) {
+                System.out.println(s.split("=")[0] + "=" + s.split("=")[1]);
+            }
+            System.out.println();
+        }
 
         // header parsing
         str = in.readLine();
